@@ -35,25 +35,27 @@ class _LoginScreenState extends State<LoginScreen> {
         phoneNumber: '+91 ${_phoneTC.text}',
         verificationCompleted: (PhoneAuthCredential credential) async {
           CustomWidgets.showSnackbar("Verifying...", context);
-          credential = PhoneAuthProvider.credential(
-              verificationId: _verificationId, smsCode: _otpTC.text.trim());
+
           final UserCredential user =
               await auth.signInWithCredential(credential);
-          AppConstants.loggedUser = UserModel(
-              auth: Auth(
-                accessToken: user.credential.token.toString(),
-              ),
-              userData: UserData(
-                phoneNumber: user.user.phoneNumber,
-                email: user.user.email,
-                firstName: user.user.displayName,
-                imageURL: user.user.photoURL,
-              ));
-          if (mounted) {
-            setState(() {
-              showLoader = false;
-            });
-            await AuthBloc().login(AppConstants.loggedUser, context);
+          if (user.user?.uid != null) {
+            AppConstants.loggedUser = UserModel(
+                auth: Auth(
+                  accessToken: user.credential.token.toString(),
+                ),
+                userData: UserData(
+                  phoneNumber: user.user.phoneNumber,
+                  email: user.user.email,
+                  firstName: user.user.displayName,
+                  imageURL: user.user.photoURL,
+                ));
+            if (mounted) {
+              setState(() {
+                showLoader = false;
+              });
+              CustomWidgets.showSnackbar("Logging in...", context);
+              await AuthBloc().login(AppConstants.loggedUser, context);
+            }
           }
         },
         timeout: _otpTimeOut,

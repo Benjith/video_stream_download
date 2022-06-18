@@ -53,6 +53,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 "Issue with streaming video", context));
         }
       }
+      setState(() {
+        _urlKey = UniqueKey();
+      });
     } catch (e) {
       CustomWidgets.showSnackbar(e.toString(), context);
     }
@@ -67,10 +70,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
+  UniqueKey _urlKey;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +133,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                     AspectRatio(
                                       aspectRatio:
                                           _controller.value.aspectRatio,
-                                      child: VideoPlayer(_controller),
+                                      child: VideoPlayer(
+                                        _controller,
+                                        key: _urlKey,
+                                      ),
                                     ),
                                     Align(
                                       alignment: Alignment.bottomCenter,
@@ -173,31 +180,48 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                             Expanded(
                                                 child: Column(
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child:
-                                                          VideoProgressIndicator(
-                                                        _controller,
-                                                        allowScrubbing: true,
-                                                        colors:
-                                                            const VideoProgressColors(
-                                                          playedColor:
-                                                              Color(0xff57EE9D),
-                                                          backgroundColor:
-                                                              Color(0xff525252),
+                                                Expanded(
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child:
+                                                            VideoProgressIndicator(
+                                                          _controller,
+                                                          allowScrubbing: true,
+                                                          colors:
+                                                              const VideoProgressColors(
+                                                            playedColor: Color(
+                                                                0xff57EE9D),
+                                                            backgroundColor:
+                                                                Color(
+                                                                    0xff525252),
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 13.5,
-                                                    ),
-                                                    Text(
-                                                      '${_controller.value.position.toMinutesSeconds()} /${_controller.value.duration.toMinutesSeconds()}',
-                                                      style: const TextStyle(
-                                                          color: Colors.white),
-                                                    )
-                                                  ],
+                                                      const SizedBox(
+                                                        width: 13.5,
+                                                      ),
+                                                      TweenAnimationBuilder<
+                                                          Duration>(
+                                                        tween: Tween(
+                                                            begin: _controller
+                                                                .value.duration,
+                                                            end: Duration.zero),
+                                                        duration: _controller
+                                                            .value.duration,
+                                                        builder: (context,
+                                                            value, child) {
+                                                          return Text(
+                                                            '${_controller.value.position.toMinutesSeconds()} /${_controller.value.duration.toMinutesSeconds()}',
+                                                            style:
+                                                                const TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(
                                                   height: 11.2,
@@ -515,12 +539,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   _playNextVideo() async {
     index += 1;
     _controller.pause();
+    _controller = null;
     await attachVideoTOPlayer();
   }
 
   _playPrevVideo() async {
     index -= 1;
     _controller.pause();
+    _controller = null;
     await attachVideoTOPlayer();
   }
 
