@@ -25,67 +25,72 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showLoader = false;
   final Duration _otpTimeOut = const Duration(seconds: 50);
   _sendOTPClick() async {
-    if (_phoneTC.text.trim().isEmpty) {
-      return CustomWidgets.showSnackbar("Enter phone number to login", context);
-    }
-    setState(() {
-      showLoader = true;
-    });
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '+91 ${_phoneTC.text}',
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          CustomWidgets.showSnackbar("Verifying...", context);
+    try {
+      if (_phoneTC.text.trim().isEmpty) {
+        return CustomWidgets.showSnackbar(
+            "Enter phone number to login", context);
+      }
+      setState(() {
+        showLoader = true;
+      });
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: '+91 ${_phoneTC.text}',
+          verificationCompleted: (PhoneAuthCredential credential) async {
+            CustomWidgets.showSnackbar("Verifying...", context);
 
-          final UserCredential user =
-              await auth.signInWithCredential(credential);
-          if (user.user?.uid != null) {
-            AppConstants.loggedUser = UserModel(
-                auth: Auth(
-                  accessToken: user.credential.token.toString(),
-                ),
-                userData: UserData(
-                  phoneNumber: user.user.phoneNumber,
-                  email: user.user.email,
-                  firstName: user.user.displayName,
-                  imageURL: user.user.photoURL,
-                ));
-            if (mounted) {
-              setState(() {
-                showLoader = false;
-              });
-              CustomWidgets.showSnackbar("Logging in...", context);
-              await AuthBloc().login(AppConstants.loggedUser, context);
+            final UserCredential user =
+                await auth.signInWithCredential(credential);
+            if (user.user?.uid != null) {
+              AppConstants.loggedUser = UserModel(
+                  auth: Auth(
+                    accessToken: user.credential.token.toString(),
+                  ),
+                  userData: UserData(
+                    phoneNumber: user.user.phoneNumber,
+                    email: user.user.email,
+                    firstName: user.user.displayName,
+                    imageURL: user.user.photoURL,
+                  ));
+              if (mounted) {
+                setState(() {
+                  showLoader = false;
+                });
+                CustomWidgets.showSnackbar("Logging in...", context);
+                await AuthBloc().login(AppConstants.loggedUser, context);
+              }
             }
-          }
-        },
-        timeout: _otpTimeOut,
-        verificationFailed: (FirebaseAuthException e) {
-          CustomWidgets.showSnackbar(e.message ?? "Error", context);
-        },
-        codeSent: (String verificationId, int resendToken) {
-          CustomWidgets.showSnackbar("code sent" ?? "Error", context);
-          setState(() {
-            _view = pageMode.otp;
-            _verificationId = verificationId;
-            _resendToken = _resendToken;
-          });
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          if (mounted) {
-            CustomWidgets.showSnackbar("Timeout!", context);
-            //show resend button
+          },
+          timeout: _otpTimeOut,
+          verificationFailed: (FirebaseAuthException e) {
+            CustomWidgets.showSnackbar(e.message ?? "Error", context);
+          },
+          codeSent: (String verificationId, int resendToken) {
+            CustomWidgets.showSnackbar("code sent", context);
             setState(() {
+              _view = pageMode.otp;
               _verificationId = verificationId;
-              showResendButton = !showResendButton;
+              _resendToken = _resendToken;
             });
-            //auto re-resend otp
-            _verifyOtpClick();
-          }
-        },
-        forceResendingToken: _resendToken);
-    setState(() {
-      showLoader = false;
-    });
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {
+            if (mounted) {
+              CustomWidgets.showSnackbar("Timeout!", context);
+              //show resend button
+              setState(() {
+                _verificationId = verificationId;
+                showResendButton = !showResendButton;
+              });
+              //auto re-resend otp
+              _verifyOtpClick();
+            }
+          },
+          forceResendingToken: _resendToken);
+      setState(() {
+        showLoader = false;
+      });
+    } catch (e) {
+      CustomWidgets.showSnackbar(e.toString(), context);
+    }
   }
 
   _verifyOtpClick() async {
@@ -121,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      CustomWidgets.showSnackbar("OTP is not wrong!", context);
+      CustomWidgets.showSnackbar("OTP is wrong!", context);
       setState(() {
         showLoader = false;
         showResendButton = false;
