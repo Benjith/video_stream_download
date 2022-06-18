@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "740465734498",
+    "project_id": "fluttervideostream",
+    "storage_bucket": "fluttervideostream.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740465734498:android:548bcbea04d3098972723b",
+        "android_client_info": {
+          "package_name": "com.example.flutter_video_stream"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "740465734498-i8ia3ule7hvvogr8qpcinffgurj6589q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8tMF_Xhny2dbLOkau2DteUdHrTK_WGRM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "740465734498-i8ia3ule7hvvogr8qpcinffgurj6589q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
